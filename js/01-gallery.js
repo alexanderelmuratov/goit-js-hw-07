@@ -3,46 +3,48 @@ import { galleryItems } from './gallery-items.js';
 
 const galleryContainer = document.querySelector('.gallery');
 const galleryMarkup = createGalleryItemsMarkup(galleryItems);
-
 galleryContainer.insertAdjacentHTML('beforeend', galleryMarkup);
-
 galleryContainer.addEventListener('click', onGalleryContainerClick);
 
 function createGalleryItemsMarkup(items) {
-    return items
-        .map(({ preview, original, description }) => {
-            return `
-              <div class="gallery__item">
-                <a class="gallery__link" href="${original}">
-                  <img
-                    class="gallery__image"
-                    src="${preview}"
-                    data-source="${original}"
-                    alt="${description}"
-                  />
-                </a>
-              </div>
-            `;
-        })
-        .join('');
+  return items
+    .map(({ preview, original, description }) => {
+      return `
+        <div class="gallery__item">
+          <a class="gallery__link" href="${original}">
+            <img
+              class="gallery__image"
+              src="${preview}"
+              data-source="${original}"
+              alt="${description}"
+            />
+          </a>
+        </div>
+      `;
+    })
+    .join('');
 }
 
+let instance = basicLightbox.create(`<img src="" />`, {
+  onShow: () => {
+    window.addEventListener('keydown', onKeyPress);
+  },
+  onClose: () => {
+    window.removeEventListener('keydown', onKeyPress);
+  }
+});
+
 function onGalleryContainerClick(evt) {
-    evt.preventDefault();
-    
-    if (!evt.target.classList.contains('gallery__image')) {
-        return;
-    }    
+  evt.preventDefault(); 
+  if (!evt.target.classList.contains('gallery__image')) {
+    return;
+  }
+  instance.element().querySelector('img').src = evt.target.dataset.source;
+  instance.show();    
+}
 
-    const instance = basicLightbox.create(`<img src="${evt.target.dataset.source}">`);
-    instance.show(() => {
-        window.addEventListener('keydown', onKeyPress);        
-    });
-
-    function onKeyPress(evt) {
-        if (evt.code === 'Escape') {
-            instance.close();
-        };
-        console.log(evt);
-    }
+function onKeyPress(evt) {
+  if (evt.code === 'Escape') {
+    instance.close();  
+  }
 }
